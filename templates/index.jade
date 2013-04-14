@@ -1,0 +1,74 @@
+doctype 5
+html(lang="en")
+    head
+        meta(charset="utf-8")
+        title= "Youclid"
+        link(href="css/bootstrap.min.css", rel="stylesheet", media="screen")
+
+        script(src="/js/signals.min.js", type="text/javascript")
+        script(src="/js/core/utils.js", type="text/javascript")
+        script(src="/js/core/plot.js", type="text/javascript")
+        script(src="/js/core/circle.js", type="text/javascript")
+        //- <!--script src="/static/js/core/intersection.js" type="text/javascript"></script-->
+        script(src="/js/core/line.js", type="text/javascript")
+        script(src="/js/core/point.js", type="text/javascript")
+        script(src="/js/render/style.js", type="text/javascript")
+        script(src="/js/render/view.js", type="text/javascript")
+        script(src="/js/render/render.js", type="text/javascript")
+        script(src="/js/render/labeling.js", type="text/javascript")
+        script(src="/js/web/actions.js", type="text/javascript")
+        script(type="text/javascript")
+            var plot = new Plot();
+
+            function init() {
+                var plotCanvas = $("#plotCanvas")[0];
+                /*window.onload = window.onresize = function() {
+                    var theCanvas = $("#plotCanvas")[0];
+                    theCanvas.width = document.width;
+                    theCanvas.height = document.height;
+                };*/
+                render = new Render(plot, plotCanvas);
+                render.updateCanvasSize();
+                $(window).resize(function () { render.updateCanvasSize(); });
+                Action.assignAll(plotCanvas, render);
+            }
+
+    body(onload="init()")
+        div.container-fluid
+            div.navbar
+                div.navbar-inner
+                    a.brand(href="#") Youclid
+            div.row-fluid
+                div.span3
+                    //- sidebar
+                    div.toolbar
+                        div.btn.select-action
+                            img(src="images/arrow.png", alt="sel")
+                        div.btn.zoom
+                            img(src="images/zoom.png", alt="zoom")
+                        div.btn.point-action
+                            img(src="/images/kig/point.png",alt="pnt")
+                        div.btn.midpoint-action
+                            img(src="/images/kig/bisection.png",alt="pnt")
+                        div.btn.line-action
+                            img(src="/images/kig/line.png",alt="line")
+                        div.btn.circlebcp-action
+                            img(src="/images/kig/circlebcp.png",alt="crcl")
+                        div.btn.circleb3p-action
+                            img(src="/images/kig/circleb3p.png",alt="cbtp")
+                        div.btn.ln-crv-int-action
+                            img(src="/images/kig/line_curve_intersection.png")
+                        div.btn.parallel-action
+                            img(src="/images/kig/parallel.png",alt="parl")
+                        div.btn.perpendicular-action
+                            img(src="/images/kig/perpendicular.png",alt="perp")
+                        div.btn.save-action
+                            img(src="/images/perpendicular_line.png",alt="save")
+                        div.btn.load-action
+                            img(src="/images/perpendicular_line.png",alt="load")
+                    div.selectionInfo "aaa"
+                div.plot.span9
+                    div#wrapper
+                        canvas#plotCanvas
+        script(src="http://code.jquery.com/jquery.js")
+        script(src="js/bootstrap.min.js")

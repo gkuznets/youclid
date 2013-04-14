@@ -1,0 +1,14 @@
+{
+    "name": "youclid",
+    "description": "youclid geometry app",
+    "version": "0.0.1",
+    "private": true,
+    "dependencies": {
+        "codo":          "*",
+        "coffee-script": "1.6.x",
+        "express":       "3.x",
+        "jade":          "*",
+        "signals":       "*"
+    },
+    "keywords": ["geometry"]
+}

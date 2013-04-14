@@ -1,0 +1,86 @@
+
+* { margin: 0; padding: 0;}
+
+/* body, html { height:100%; } */
+
+body {
+    background-color: rgb(227, 255, 249);
+}
+
+#logo {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    border-radius: 10px;
+    width: 320px;
+    background-color: rgb(247, 228, 168);
+}
+
+/*
+#toolbar {
+    position: absolute;
+    top: 120px;
+    left: 10px;
+    border-radius: 10px;
+    background-color: rgb(255, 255, 230);
+    z-index: 1;
+}*/
+/*
+div {
+    z-index: 1;
+}*/
+
+/*
+ * Header
+ */
+
+.header {
+    top: 0px;
+    width: 100%;
+    text-align:center;
+}
+
+.logo {
+    position: absolute;
+    left: 0px;
+}
+
+.plotName {
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.login {
+    background-color: rgb(100, 120, 140);
+    position: absolute;
+    right: 0px;
+    top: 0px;
+}
+
+.container {
+    width: 100%;
+}
+
+/*
+ * Sidebar.
+ */
+.sidebar {
+    width: 300px;
+    float: left;
+}
+
+.toolbar {
+    background-color: rgb(200, 200, 200);
+    display: block;
+}
+.btn {
+    float: left;
+}
+
+.selectionInfo {
+    float: top;
+}
+.plot {
+    margin-left: 304px;
+}
+
