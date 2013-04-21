@@ -1,5 +1,7 @@
 core = require "./core"
 Rect = core.Rect
+Size = core.Size
+SizePolicy = core.SizePolicy
 
 class BaseObject
     @nextId_ = 0
@@ -16,24 +18,26 @@ class BaseObject
 
 
 class Widget extends BaseObject
+    @MAXIMUM_SIZE = 10000
+
     constructor: (@parent_) ->
         super()
         @children_ = []
         @color_ = "rgb(#{rand(256)},#{rand(256)},#{rand(256)})"
-        @geometry_ = new Rect 100, 100, 100, 200
         @layout_ = null
+        @sizeHint_ = new Size 400, 400
+        @sizePolicy_ = new SizePolicy \
+                            SizePolicy.PREFERRED,
+                            SizePolicy.PREFERRED
         @visible_ = false
 
         @initDiv_()
+        @setGeometry new Rect 0, 0, @sizeHint().width(), @sizeHint().height()
 
     initDiv_: ->
-        @div_ = $("<div>test</div>")
+        @div_ = $("<div>test #{@id()}</div>")
             .css("position", "absolute")
             .css("background-color", @color_)
-            .css("left", @x())
-            .css("top", @y())
-            .width(@width())
-            .height(@height())
             .appendTo(@parentElement_())
             #.css("display", "none")
 
@@ -53,6 +57,7 @@ class Widget extends BaseObject
             @parent_ = parent
             @parent_?.addChild_ this
             @div_.appendTo @parentElement_()
+        this
 
     parentElement_: ->
         if @parent_
@@ -72,6 +77,36 @@ class Widget extends BaseObject
             @layout_ = layout
             @layout_?.setParent this
             @layout_?.setGeometry @rect()
+        this
+
+    sizeHint: -> clone @sizeHint_
+    size: -> @geometry_.size()
+    setMinimumSize: (@sizeHint_) ->
+        if arguments.length == 2
+            @sizeHint_ = new Size arguments[0], arguments[1]
+        # TODO: check if min size is invalid
+        minWidth = @sizeHint_.width()
+        @sizePolicy_.setHorizontalPolicy \
+            if minWidth == 0
+                @sizePolicy_.horizontalPolicy() & ~SizePolicy.GROW_FLAG
+            else
+                SizePolicy.addMinimum @sizePolicy_.horizontalPolicy()
+        if minWidth > @width()
+            @setWidth minWidth
+
+        minHeight = @sizeHint_.height()
+        @sizePolicy_.setVerticalPolicy \
+            if minWidth == 0
+                @sizePolicy_.verticalPolicy() & ~SizePolicy.GROW_FLAG
+            else
+                SizePolicy.addMinimum @sizePolicy_.verticalPolicy()
+        if minHeight > @height()
+            @setHeight minHeight
+        console.log "sms #{@sizeHint_}"
+        this
+
+    setMaximumSize: -> (@maxSize_) ->
+    sizePolicy: -> clone @sizePolicy_
 
     pos: -> clone @geometry_.topLeft()
 
@@ -84,6 +119,7 @@ class Widget extends BaseObject
         @div_.width @width()
         @layout_?.setGeometry @rect()
         @render()
+        this
 
     x: -> @pos().x()
     y: -> @pos().y()
@@ -93,14 +129,16 @@ class Widget extends BaseObject
         @geometry_.setWidth newWidth
         @div_.width @width()
         @layout_?.setGeometry @rect()
-        render()
+        @render()
+        this
 
     height: -> @geometry_.height()
     setHeight: (newHeight) ->
         @geometry_.setHeight newHeight
         @div_.height @height()
         @layout_?.setGeometry @rect()
-        render()
+        @render()
+        this
 
     move: (dx, dy) ->
         @moveTo @pos().moved dx, dy
@@ -110,6 +148,7 @@ class Widget extends BaseObject
         @div_.css "left", @x()
         @div_.css "top", @y()
         @render()
+        this
 
 exports.BaseObject = BaseObject
 exports.Widget = Widget

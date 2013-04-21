@@ -2,6 +2,7 @@ core = require "./core"
 widget = require "./widget"
 Point = core.Point
 Rect = core.Rect
+SizePolicy = core.SizePolicy
 
 class Layout extends widget.BaseObject
     constructor: (@parent_) ->
@@ -30,6 +31,7 @@ class BoxLayout extends Layout
         super()
 
     addWidget: (widget, stretch = 0) ->
+        console.log "#{widget.sizeHint()}"
         # TODO: check if widget is already here
         @items_.push new BoxLayout.WidgetItem widget, stretch
         @updateItemGeometries_()
@@ -59,20 +61,35 @@ class BoxLayout extends Layout
         stretch: ->
             _ABSTRACT()
 
+        sizePolicy: ->
+            _ABSTRACT()
+
 
     @StretchItem: class extends @BoxLayoutItem
+        @sizePolicy_: new SizePolicy SizePolicy.EXPANDING, SizePolicy.EXPANDING
         constructor: (@stretch_) ->
         stretch: -> @stretch_
+        sizePolicy: -> clone BoxLayout.StretchItem.sizePolicy_
+        sizeHint: ->
         setGeometry: ->
         setParent: ->
 
 
     @SpacingItem: class extends @BoxLayoutItem
+        @sizePolicy_: new SizePolicy SizePolicy.FIXED, SizePolicy.FIXED
+        constructor: (@value_) ->
+        stretch: -> 0
+        sizePolicy: -> clone BoxLayout.SpacingItem.sizePolicy_
+        sizeHint: -> new Size @value_, @value_
+        setGeometry: ->
+        setParent: ->
 
 
     @WidgetItem: class extends @BoxLayoutItem
         constructor: (@widget_, @stretch_) ->
         stretch: -> @stretch_
+        sizePolicy: -> @widget_.sizePolicy()
+        sizeHint: -> @widget_.sizeHint()
 
         setGeometry: (rect) ->
             @widget_.setGeometry rect
@@ -94,16 +111,52 @@ class VBoxLayout extends BoxLayout
             else
                 (1.0 / @items_.length for i in @items_)
 
+        leftHeight = @rect_.height()
+        # checking min sizes
+        needMoreIterations = true
+        while needMoreIterations
+            console.log "#{portions}"
+            [totalStretch, leftHeight, needMoreIterations] =
+                @checkMinHeights_ portions, totalStretch, leftHeight
+            if needMoreIterations and totalStretch > 0
+                for i in [0..@items_.length - 1]
+                    if portions[i]
+                        portions[i] = @items_[i].stretch() / totalStretch
+
         left = @rect_.left()
         right = @rect_.right()
         y = @rect_.top()
-        for portion in portions
-            itemHeight = @rect_.height() * portion
+        for i in [0..@items_.length - 1]
+            portion = portions[i]
+            itemHeight = \
+                if portion
+                    leftHeight * portion
+                else
+                    @items_[i].sizeHint().height()
             result.push new Rect new Point(left, y),
                                  new Point(right, y + itemHeight)
             y += itemHeight
 
         result
+
+    checkMinHeights_: (portions, totalStretch, leftHeight) ->
+        heightToExtract = 0
+        needMoreIterations = false
+        for i in [0..@items_.length - 1]
+            if portions[i] is undefined
+                continue
+
+            item = @items_[i]
+            if item.sizePolicy().verticalPolicy() in [SizePolicy.FIXED,
+                                                      SizePolicy.MINIMUM,
+                                                      SizePolicy.MINIMUM_EXPANDING]
+                if portions[i] * leftHeight < item.sizeHint().height()
+                    heightToExtract += item.sizeHint().height()
+                    totalStretch -= item.stretch()
+                    portions[i] = undefined
+                    needMoreIterations = true
+        [totalStretch, Math.max(0, leftHeight - heightToExtract), needMoreIterations]
+
 
 class HBoxLayout extends BoxLayout
     calculateItemRects_: ->
