@@ -11,11 +11,14 @@ module.exports = (grunt) ->
                 files: {
                     'src/core/circle.js': 'src/core/circle.coffee',
                     'src/core/curve.js': 'src/core/curve.coffee',
+                    'src/core/line.js': 'src/core/line.coffee',
                     'src/core/plot.js': 'src/core/plot.coffee',
                     'src/core/plot_object.js': 'src/core/plot_object.coffee',
-                    'src/core/line.js': 'src/core/line.coffee',
                     'src/core/point.js': 'src/core/point.coffee',
-                    'src/view/view.js': 'src/view/view.coffee',
+                    'src/core/segment.js': 'src/core/segment.coffee',
+                    'src/core/vec.js': 'src/core/vec.coffee',
+
+                    'src/view/view.js': 'src/view/view.snap.coffee',
                 }
             }
         },

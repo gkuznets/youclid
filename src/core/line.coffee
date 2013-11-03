@@ -1,5 +1,6 @@
-Curve = (require "./curve").Curve
-PlotObjectImpl = (require "./plot_object").PlotObjectImpl
+Curve = (require './curve').Curve
+PlotObjectImpl = (require './plot_object').PlotObjectImpl
+Vec = (require './vec').Vec
 
 class Line extends Curve
     constructor: (impl, name) ->
@@ -54,8 +55,8 @@ Line.By2Points = class extends PlotObjectImpl
 
     source: -> @p0_
 
-    dir: -> null
-        #{x: @p1_.x() - @p0_.x(), y: @p1_.y() - @p0_.y()}
+    dir: ->
+        new Vec @p1_.x() - @p0_.x(), @p1_.y() - @p0_.y()
 
     a: ->
         if (@p0_.y() == @p1_.y()) then 0.0 else 1.0
@@ -73,10 +74,8 @@ Line.By2Points = class extends PlotObjectImpl
     k: ->
         # -b/a
         dy = @p0_.y() - @p1_.y()
-        if dy == 0
-            Infinity
-        else
-            -(@p1_.x() - @p0_.x()) / dy
+        # Automatically handles +/-Infinity cases
+        -(@p1_.x() - @p0_.x()) / dy
 
     x: (y) ->
         dy = @p1_.y() - @p0_.y()
@@ -120,7 +119,7 @@ Line.Perpendicular = class extends PlotObjectImpl
 
     source: -> @pt_
 
-    dir: -> null
+    dir: -> @line_.dir().perp()
 
     a: ->
         if @k() == Infinity then 0 else 1.0
