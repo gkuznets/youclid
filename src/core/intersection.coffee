@@ -1,10 +1,12 @@
+Point = (require "./point").Point
+
 class LineLineIntersection
     constructor: (@line0_, @line1_) ->
-        @line0_.addChild this
-        @line1_.addChild this
+        @line0_.addChild @
+        @line1_.addChild @
 
     addToPlot: (plot) ->
-        @point_ = new Point(new LineLineIntersection.PointImpl this)
+        @point_ = new Point(new LineLineIntersection.PointImpl @)
         plot.add @point_
 
 
@@ -22,7 +24,7 @@ LineLineIntersection.PointImpl = class
         d = a0 * b1 - a1 * b0
         if (d != 0)
             - (c0 * b1 - c1 * b0) / d
- 
+
     y: ->
         a0 = @parent_.line0_.a()
         b0 = @parent_.line0_.b()
@@ -34,10 +36,10 @@ LineLineIntersection.PointImpl = class
         d = a0 * b1 - a1 * b0
         if (d != 0)
             (c0 * a1 - c1 * a0) / d
- 
+
     setX: ->
         throw "trying to call setX() of dependent point"
-    
+
     xetY: ->
         throw "trying to call setY() of dependent point"
 
@@ -50,3 +52,6 @@ class Intersection
 
     addToPlot: (plot) ->
         @impl_.addToPlot plot
+
+
+module.exports.Intersection = Intersection

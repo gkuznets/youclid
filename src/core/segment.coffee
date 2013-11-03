@@ -1,3 +1,6 @@
+Curve = (require "./curve").Curve
+PlotObjectImpl = (require "./plot_object").PlotObjectImpl
+
 class Segment extends Curve
     constructor: (impl, name) ->
         super impl, name
@@ -25,3 +28,6 @@ Segment.Plain = class extends PlotObjectImpl
 
     encoded: ->
         """ "parents":[#{@p0_.id()},#{@p1_.id()}]"""
+
+
+module.exports.Segment = Segment

@@ -1,3 +1,6 @@
+PlotObject = (require "./plot_object").PlotObject
+PlotObjectImpl = (require "./plot_object").PlotObjectImpl
+
 #Global arrays
 Letters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z']
 LastUnusedLetter = 0
@@ -5,7 +8,7 @@ LastUnusedLetter = 0
 
 class Point extends PlotObject
     constructor: (impl, name = undefined) ->
-        super impl, name, Style.defaultPointStyle()
+        super impl, name
 
     # x-coordinate of the point
     x: -> @impl_.x()
@@ -21,7 +24,7 @@ class Point extends PlotObject
         @impl_.setY(y)
         this
 
-    # @return [Boolean] wether point is independent from other figures or not
+    # @return [Boolean] whether point is independent from other figures or not
     independent: -> @impl_.independent()
 
     toString: ->
@@ -103,7 +106,7 @@ Point.midpoint = (pt0, pt1) ->
     PointMidpoint.create pt0, pt1
 
 # -----------------------------------------------------------------
-# Точка, как пересечение двух линий
+# Point as an intersection of two lines
 # -----------------------------------------------------------------
 
 Point.intersection = (curve0, curve1) ->
@@ -114,7 +117,7 @@ Point.intersection = (curve0, curve1) ->
     else
         console.log "Can not intersect two given curves"
 
-# Точка пересечения двух прямых
+# Intersection of two lines
 class PointLineLineIntersection extends PlotObjectImpl
     @fullName = @register "PointLineLineIntersection"
 
@@ -216,3 +219,5 @@ class PointCircleCircleIntersection extends PlotObjectImpl
             sibling = PlotObject.find json.sibling
             return new Point(new @ circ0, circ1, sibling)
 
+
+module.exports.Point = Point

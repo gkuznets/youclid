@@ -1,8 +1,11 @@
+Curve = (require "./curve").Curve
+PlotObjectImpl = (require "./plot_object").PlotObjectImpl
+
 class Line extends Curve
     constructor: (impl, name) ->
         super impl, name
 
-    # Произвольная точка на прямой
+    # Arbitrary point on the line
     source: ->
         @impl_.source()
 
@@ -198,7 +201,7 @@ Line.Parallel = class extends PlotObjectImpl
             undefined
 
     sqDist: (x, y) ->
-        # copy-pasted from perpenicular
+        # copy-pasted from perpendicular
         # dx = 1.0
         dy = y(@pt_.x() + 1) - @pt_.x()
         dx0 = x - @pt_.x()
@@ -217,3 +220,5 @@ Line.Parallel = class extends PlotObjectImpl
 Line.parallel = (pt, line) ->
     new Line(new Line.Parallel pt, line)
 
+
+module.exports.Line = Line

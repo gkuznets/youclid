@@ -1,3 +1,6 @@
+Curve = (require "./curve").Curve
+PlotObjectImpl = (require "./plot_object").PlotObjectImpl
+
 class Circle extends Curve
     constructor: (impl, name = undefined) ->
         super impl, name
@@ -38,7 +41,7 @@ Circle.ByCenterAndPoint = class extends PlotObjectImpl
 Circle.byCenterAndPoint = (center, point) ->
     new Circle new Circle.ByCenterAndPoint center, point
 
-
+# TODO: fix me
 Circle.By3Points = class extends PlotObjectImpl
     @fullName = @register "Circle.By3Points"
 #    constructor: (@p0_, @p1_, @p2_) ->
@@ -111,3 +114,5 @@ Circle.By3Points = class extends PlotObjectImpl
 Circle.by3Points = (p0, p1, p2) ->
     new Circle new Circle.By3Points p0, p1, p2
 
+
+module.exports.Circle = Circle
