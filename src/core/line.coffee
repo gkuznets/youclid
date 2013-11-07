@@ -109,7 +109,10 @@ Line.By2Points = class extends PlotObjectImpl
 
 
 Line.by2Points = (p0, p1) ->
-    new Line(new Line.By2Points p0, p1)
+    l = new Line(new Line.By2Points p0, p1)
+    p0.addChild l
+    p1.addChild l
+    l
 
 
 Line.Perpendicular = class extends PlotObjectImpl
@@ -162,7 +165,10 @@ Line.Perpendicular = class extends PlotObjectImpl
         new Line.perpendicular p, l
 
 Line.perpendicular = (pt, line) ->
-    new Line(new Line.Perpendicular pt, line)
+    l = new Line new Line.Perpendicular pt, line
+    pt.addChild l
+    line.addChild l
+    l
 
 
 Line.Parallel = class extends PlotObjectImpl
@@ -217,7 +223,10 @@ Line.Parallel = class extends PlotObjectImpl
         new Line.parallel p, l
 
 Line.parallel = (pt, line) ->
-    new Line(new Line.Parallel pt, line)
+    new Line new Line.Parallel pt, line
+    pt.addChild l
+    line.addChild l
+    l
 
 
 module.exports.Line = Line

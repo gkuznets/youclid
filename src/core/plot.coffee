@@ -18,7 +18,9 @@ class Plot
         else if obj instanceof Curve
             @curves_.push obj
 
-        @changed.dispatch()
+        obj.changed.add (objs) => @changed.dispatch objs
+        @changed.dispatch [obj]
+
 
     points: -> @points_
 

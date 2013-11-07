@@ -17,12 +17,14 @@ class Point extends PlotObject
     y: -> @impl_.y()
 
     setX: (x) ->
-        @impl_.setX(x)
-        this
+        @impl_.setX x
+        @changed.dispatch [@].concat @children true
+        @
 
     setY: (y) ->
-        @impl_.setY(y)
-        this
+        @impl_.setY y
+        @changed.dispatch [@].concat @children true
+        @
 
     # @return [Boolean] whether point is independent from other figures or not
     independent: -> @impl_.independent()
@@ -122,6 +124,8 @@ class PointLineLineIntersection extends PlotObjectImpl
     @fullName = @register "PointLineLineIntersection"
 
     constructor: (@line0_, @line1_) ->
+        @line0_.addChild @
+        @line1_.addChild @
 
     x: ->
         (@line0_.b()*@line1_.c() - @line1_.b()*@line0_.c()) / @det_()

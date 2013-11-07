@@ -18,7 +18,9 @@ module.exports = (grunt) ->
                     'src/core/segment.js': 'src/core/segment.coffee',
                     'src/core/vec.js': 'src/core/vec.coffee',
 
-                    'src/view/view.js': 'src/view/view.snap.coffee',
+                    'src/view/mouse_events_handler.js': 'src/view/mouse_events_handler.coffee',
+                    'src/view/view.js': 'src/view/view.canvas.coffee',
+                    'src/view/view_port.js': 'src/view/view_port.coffee',
                 }
             }
         },

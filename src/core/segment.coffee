@@ -29,5 +29,10 @@ Segment.Plain = class extends PlotObjectImpl
     encoded: ->
         """ "parents":[#{@p0_.id()},#{@p1_.id()}]"""
 
+Segment.by2Points = (p0, p1)
+    s = new Segment new Segment.Plain p0, p1
+    p0.addChild s
+    p1.addChild s
+    s
 
 module.exports.Segment = Segment

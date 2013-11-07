@@ -28,7 +28,7 @@ Circle.ByCenterAndPoint = class extends PlotObjectImpl
     radius: ->
         dx = @center_.x() - @point_.x()
         dy = @center_.y() - @point_.y()
-        Math.sqrt(dx*dx + dy*dy)
+        Math.sqrt dx*dx + dy*dy
 
     encoded: ->
         """ "parents":[#{@center_.id()}, #{@point_.id()}]"""
@@ -39,7 +39,11 @@ Circle.ByCenterAndPoint = class extends PlotObjectImpl
         Circle.byCenterAndPoint c, p
 
 Circle.byCenterAndPoint = (center, point) ->
-    new Circle new Circle.ByCenterAndPoint center, point
+    circ = new Circle new Circle.ByCenterAndPoint center, point
+    center.addChild circ
+    point.addChild circ
+    circ
+
 
 # TODO: fix me
 Circle.By3Points = class extends PlotObjectImpl
