@@ -63,7 +63,6 @@ class Element implements Movable {
 
     hoverIn() {
         this.size_ = 2;
-        this.changed_.emit();
         if (this.onHoverIn_) {
             this.onHoverIn_();
         }
@@ -71,7 +70,6 @@ class Element implements Movable {
 
     hoverOut() {
         this.size_ = 1;
-        this.changed_.emit();
         if (this.onHoverOut_) {
             this.onHoverOut_();
         }
@@ -327,19 +325,24 @@ class View extends ViewPort {
     }
 
     private onMouseMove(x, y) {
+        var needRepaint = false;
         var elements = this.nearElements(x, y);
-
         this.hoveredElements_.forEach((elem) => {
-            if (elements.indexOf(elem) != -1) {
+            if (elements.indexOf(elem) == -1) {
                 elem.hoverOut();
+                needRepaint = true;
             }
         });
         elements.forEach((elem) => {
-            if (this.hoveredElements_.indexOf(elem) != -1) {
+            if (this.hoveredElements_.indexOf(elem) == -1) {
                 elem.hoverIn();
+                needRepaint = true;
             }
         });
         this.hoveredElements_ = elements;
+        if (needRepaint) {
+            this.strokeAll();
+        }
     }
 
     private onStartDrag(x, y) {
