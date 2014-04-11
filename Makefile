@@ -1,20 +1,26 @@
-COFFEE_SOURCES=$(shell find static/js -name "*.coffee")
-COFFEE_SOURCES+=app.js
-JS_SOURCES=$(patsubst %.coffee,%.js,$(COFFEE_SOURCES))
+BUILD_DIR=./build
 
-%.js : %.coffee
-	coffee -cb $< > $@
+BROWSERIFY=./node_modules/browserify/bin/cmd.js
+TSC=./node_modules/typescript/bin/tsc
 
-# compile all js files
-js: $(JS_SOURCES)
+#build/%.js: src/%.ts
+#	$(TSC) --module commonjs --target ES5 $< --outDir $(dir $@)
 
-doc: $(COFFEE_SOURCES)
-	codo -n youclid --title "youclid documentation" $(COFFEE_SOURCES)
+SOURCES:=$(wildcard src/core/*.ts) $(wildcard src/view/*.ts)
+.PHONY: js
+js: $(SOURCES)
+	$(TSC) --module commonjs --target ES5 src/youclid.ts --outDir $(BUILD_DIR)
 
-run: $(JS_SOURCES)
-	node app
+.DEFAULT_GOAL := bundle
+.PHONY: bundle
+bundle: js
+	$(BROWSERIFY) -o static/js/youclid.js -r $(BUILD_DIR)/youclid.js:youclid
 
-clean:
-	echo $(COFFEE_SOURCES)
-	rm -rf $(JS_SOURCES)
-	rm -rf doc
+.PHONY: setup
+setup:
+	npm install
+	./node_modules/tsd/build/cli.js query jquery underscore --action install
+
+#.PHONY: clean
+#clean:
+

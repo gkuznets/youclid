@@ -1,0 +1,30 @@
+<html>
+<script src="static/js/jquery-min.js" type="text/javascript"></script>
+<script src="static/js/underscore-min.js" type="text/javascript"></script>
+<script src="static/js/youclid.js" type="text/javascript"></script>
+<script type="text/javascript">
+var view;
+function createPlot() {
+    var y = require("youclid");
+    var plot = new y.Plot();
+    var p0 = y.point.independent(1, 2);
+    var p1 = y.point.independent(3, 3);
+    var p2 = y.point.independent(-1, 0);
+    var p3 = y.point.independent(0, 20);
+    var l = y.line.by2Points(p0, p1);
+    plot.add(p0);
+    plot.add(p1);
+    plot.add(p2);
+    plot.add(p3);
+    plot.add(l);
+    
+    view = new y.View(plot, document.getElementById("plotCanvas"));
+    view.strokeAll();
+}
+</script>
+<body onload="createPlot();">
+    <div>
+        <canvas id="plotCanvas"></canvas>
+    </div>
+</body>
+</html>
