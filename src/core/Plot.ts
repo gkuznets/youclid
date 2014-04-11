@@ -35,7 +35,10 @@ class Plot {
             this.curves_.push(obj);
         }
         signals.connect(obj.changed, this.listener_,
-                (obj) => { this.changed_.emit(obj.children(true)); });
+                (obj) => {
+                    var affected = obj.children(true).concat([obj]);
+                    this.changed_.emit(affected);
+                });
         this.changed_.emit([obj]);
     }
 }
