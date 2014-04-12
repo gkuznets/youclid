@@ -1,5 +1,7 @@
 /// <reference path="../../typings/underscore/underscore.d.ts" />
 import circle = require("../core/circle");
+import Coords = require("../Coords");
+import labelling = require("./labelling");
 import line = require("../core/line");
 import MouseEventsHandler = require("./MouseEventsHandler");
 import Plot = require("../core/Plot");
@@ -7,19 +9,17 @@ import PlotObject = require("../core/PlotObject");
 import point = require("../core/point");
 import segment = require("../core/segment");
 import signals = require("../core/signals");
+import utils = require("../utils");
+import Vec = require("../Vec");
 import ViewPort = require("./ViewPort");
 
 var DEFAULT_POINT_SIZE = 2;
-
-function hypot(dx, dy) {
-    return Math.sqrt(dx * dx + dy * dy);
-}
 
 interface Movable {
     moveTo?: (x: number, y: number) => void;
 }
 
-class Element implements Movable {
+class Element implements Movable, labelling.Feature {
     private changed_: signals.Signal;
     private onHoverIn_: () => any;
     private onHoverOut_: () => any;
@@ -77,12 +77,16 @@ class Element implements Movable {
 
     get draggable() { return false; }
 
-    stroke(ctx: CanvasRenderingContext2D) {
+    stroke(ctx: CanvasRenderingContext2D, showLabel: boolean = true) {
         throw "Not implemented";
     }
 
     update() {
         throw "Not implemented";
+    }
+    
+    effect(label: labelling.Label) {
+        return Vec.zero;
     }
 }
 
@@ -105,10 +109,10 @@ class CircleElement extends Element {
     distance(x, y) {
         var dx = this.x - x;
         var dy = this.y - y;
-        return Math.abs(this.radius - hypot(dx, dy));
+        return Math.abs(this.radius - utils.hypot(dx, dy));
     }
 
-    stroke(ctx) {
+    stroke(ctx, showLabel: boolean = true) {
         ctx.lineWidth = this.size;
         ctx.strokeStyle = this.color;
         ctx.beginPath();
@@ -119,38 +123,64 @@ class CircleElement extends Element {
 }
 
 class PointElement extends Element {
-    private x: number;
-    private y: number;
+    private pos: Coords;
+    private label_: labelling.Label;
 
-    constructor(private point: point.Point, view) {
+    constructor(private point: point.Point, view, lblr: labelling.Labeller) {
         super(view);
+        this.label_ = lblr.makeLabel(this.point.name);
         this.update();
     }
 
     update() {
-        this.x = this.view.mapX(this.point.x);
-        this.y = this.view.mapY(this.point.y);
+        this.pos = {x: this.view.mapX(this.point.x),
+                    y: this.view.mapY(this.point.y)};
+        this.label_.dirty = true;
     }
 
     distance(x, y) {
-        var dx = this.x - x;
-        var dy = this.y - y;
-        return hypot(dx, dy);
+        var dx = this.pos.x - x;
+        var dy = this.pos.y - y;
+        return utils.hypot(dx, dy);
     }
 
-    stroke(ctx) {
+    stroke(ctx, showLabel: boolean = true) {
         ctx.lineWidth = this.size;
         ctx.strokeStyle = this.color;
         ctx.beginPath();
-        ctx.arc(this.x, this.y, DEFAULT_POINT_SIZE, 0, Math.PI * 2, true);
+        ctx.arc(this.pos.x, this.pos.y, DEFAULT_POINT_SIZE, 0, Math.PI * 2, true);
         ctx.closePath();
         ctx.stroke();
+        if (showLabel) {
+            this.label_.stroke(ctx);
+        }
     }
 
     get draggable() { return true; }
 
     moveTo(x, y) {
         this.point.moveTo(this.view.revMapX(x), this.view.revMapY(y));
+    }
+
+    effect(label: labelling.Label) {
+        // TODO: take size into account
+        var optimalDistance = 3.0;
+        var optimalPadding = 5.0;
+        var labelRect = label.rect;
+
+        var distance = Math.max(0.5, labelRect.distanceToPoint(this.pos));
+        var dir = new Vec(
+                labelRect.center.x - this.pos.x,
+                labelRect.center.y - this.pos.y);
+        if (this.label_ === label) {
+            return dir.resized(optimalDistance - distance);
+        } else if (distance < optimalPadding) {
+            if (dir.length < 1e-5) {
+                dir = new Vec(1.0, 0);
+            }
+            return dir.resized(optimalPadding / (2.0 * distance * distance));
+        }
+        return Vec.zero;
     }
 }
 
@@ -185,17 +215,18 @@ class LineElement  extends Element {
     }
 
     distance(x, y) {
+        // TODO: check me
         var v1x = this.x1 - this.x0;
         var v1y = this.y1 - this.y0;
         var v2x = x - this.x0;
         var v2y = y - this.y0;
-        var v1 = hypot(v1x, v1y);
-        var v2 = hypot(v2x, v2y);
+        var v1 = utils.hypot(v1x, v1y);
+        var v2 = utils.hypot(v2x, v2y);
         var v1_x_v2 = v1x * v2x + v1y * v2y;
         return Math.sqrt(v1 * v1 * v2 * v2 - v1_x_v2 * v1_x_v2) / v1;
     }
 
-    stroke(ctx) {
+    stroke(ctx, showLabel: boolean = true) {
         ctx.lineWidth = this.size;
         ctx.strokeStyle = this.color;
         ctx.beginPath();
@@ -224,7 +255,7 @@ class SegmentElement extends Element {
         this.y1_ = this.view.mapY(this.segment_.end.y);
     }
 
-    stroke(ctx) {
+    stroke(ctx, showLabel: boolean = true) {
         ctx.lineWidth = this.size;
         ctx.strokeStyle = this.color;
         ctx.beginPath();
@@ -245,6 +276,7 @@ class View extends ViewPort {
     private hoveredElements_: Element[];
     private draggedElem_; Element;
     private listener_: signals.Listener;
+    private labeller_: labelling.Labeller;
 
     constructor(plot: Plot, canvas: HTMLCanvasElement) {
         super(canvas.clientWidth, canvas.clientHeight);
@@ -256,6 +288,7 @@ class View extends ViewPort {
         this.elements_ = [];
         this.hoveredElements_ = [];
         this.listener_ = new signals.Listener("view listener");
+        this.labeller_ = new labelling.Labeller(this.elements_);
         this.setupMouseHandler();
         this.update(this.plot_.objects);
         signals.connect(
@@ -281,6 +314,7 @@ class View extends ViewPort {
                 this.elements_[object.id] = this.createElement(object);
             }
         });
+        this.labeller_.updateLabels();
         this.strokeAll();
     }
 
@@ -305,7 +339,7 @@ class View extends ViewPort {
     private createElement(obj) {
         var elem: Element;
         if (obj instanceof point.Point) {
-            elem = new PointElement(obj, this)
+            elem = new PointElement(obj, this, this.labeller_);
             elem.color = 'red';
         } else if (obj instanceof circle.Circle) {
             elem = new CircleElement(obj, this);

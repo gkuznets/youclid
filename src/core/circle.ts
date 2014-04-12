@@ -1,4 +1,4 @@
-import Coords = require("./Coords");
+import Coords = require("../Coords");
 import curve = require("./curve");
 import point = require("./point");
 

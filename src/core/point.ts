@@ -76,4 +76,3 @@ class Midpoint extends Point {
 export function midpoint(pt0, pt1): Point {
     return new Midpoint(pt0, pt1);
 }
-

@@ -1,7 +1,7 @@
-import Coords = require("./Coords");
+import Coords = require("../Coords");
 import curve = require("./curve");
 import point = require("./point");
-import Vec = require("./Vec");
+import Vec = require("../Vec");
 
 export class Line extends curve.Curve {
     // Arbitrary point on the line
